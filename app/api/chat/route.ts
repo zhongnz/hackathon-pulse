@@ -12,6 +12,7 @@ export async function POST(req: Request) {
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
     tools: agentTools,
+    toolChoice: "auto",
     stopWhen: stepCountIs(15),
     maxOutputTokens: 16000,
   })

@@ -9,43 +9,44 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts"
-interface LaborChartProps {
-  data: Array<{
-    sovLineId: string
-    budgetedLaborCost: number
-    actualLaborCost: number
-    variance: number
+
+interface BillingChartProps {
+  projects: Array<{
+    projectId: string
+    projectName: string
+    earnedValue: number
+    amountBilled: number
+    billingLag: number
   }>
-  projectId: string
 }
 
-export function LaborChart({ data, projectId }: LaborChartProps) {
-  const chartData = data.slice(0, 10).map((d) => ({
-    name: d.sovLineId.replace(`${projectId}-`, ""),
-    budget: Math.round(d.budgetedLaborCost / 1000),
-    actual: Math.round(d.actualLaborCost / 1000),
+export function BillingChart({ projects }: BillingChartProps) {
+  const data = projects.map((p) => ({
+    name: p.projectId.replace("PRJ-2024-00", "P"),
+    fullName: p.projectName,
+    earned: Math.round(p.earnedValue / 1000),
+    billed: Math.round(p.amountBilled / 1000),
+    lag: Math.round(p.billingLag / 1000),
   }))
 
   return (
     <div className="my-2 rounded-lg border border-border bg-card/50 p-3">
       <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
-        Labor: Budget vs Actual by SOV Line (in $K)
+        Billing Lag: Earned Value vs Billed ($K)
       </div>
       <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} barGap={2}>
+          <BarChart data={data} barGap={2}>
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="hsl(224, 15%, 18%)"
             />
             <XAxis
               dataKey="name"
-              tick={{ fill: "hsl(215, 15%, 55%)", fontSize: 10 }}
+              tick={{ fill: "hsl(215, 15%, 55%)", fontSize: 11 }}
               axisLine={{ stroke: "hsl(224, 15%, 18%)" }}
-              angle={-30}
-              textAnchor="end"
-              height={50}
             />
             <YAxis
               tick={{ fill: "hsl(215, 15%, 55%)", fontSize: 11 }}
@@ -60,21 +61,25 @@ export function LaborChart({ data, projectId }: LaborChartProps) {
                 fontSize: "12px",
                 color: "hsl(210, 20%, 93%)",
               }}
-              formatter={(value: number) => [`$${value}K`]}
+              formatter={(value: number, name: string) => [
+                `$${value.toLocaleString()}K`,
+                name,
+              ]}
             />
             <Legend
               wrapperStyle={{ fontSize: "11px", color: "hsl(215, 15%, 55%)" }}
             />
+            <ReferenceLine y={0} stroke="hsl(224, 15%, 18%)" />
             <Bar
-              dataKey="budget"
-              name="Budget"
+              dataKey="earned"
+              name="Earned Value"
               fill="hsl(199, 89%, 48%)"
               radius={[2, 2, 0, 0]}
             />
             <Bar
-              dataKey="actual"
-              name="Actual"
-              fill="#f59e0b"
+              dataKey="billed"
+              name="Amount Billed"
+              fill="#22c55e"
               radius={[2, 2, 0, 0]}
             />
           </BarChart>

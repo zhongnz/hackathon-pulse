@@ -134,8 +134,21 @@ export function getProjectSummaries(): Map<string, ProjectSummary> {
           contract.original_contract_value
         : 0
 
+    // Equipment and subcontractor costs from budget (treated as actual since no separate tracking)
+    const totalEquipmentCost = projectBudget.reduce(
+      (sum, b) => sum + b.estimated_equipment_cost,
+      0
+    )
+    const totalSubCost = projectBudget.reduce(
+      (sum, b) => sum + b.estimated_sub_cost,
+      0
+    )
+    // Scale equipment/sub costs by percent complete (they're budgeted amounts, prorate to progress)
+    const proRatedEquipment = totalEquipmentCost * percentComplete
+    const proRatedSub = totalSubCost * percentComplete
+
     // Computed metrics
-    const totalActualCost = totalLaborCost + totalMaterialCost
+    const totalActualCost = totalLaborCost + totalMaterialCost + proRatedEquipment + proRatedSub
     const adjustedContractValue =
       contract.original_contract_value + approvedCOValue
     const realizedMargin =

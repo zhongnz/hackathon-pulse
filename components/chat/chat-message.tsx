@@ -7,6 +7,7 @@ import { ToolActivity } from "./tool-activity"
 import { PortfolioCards } from "@/components/charts/portfolio-cards"
 import { MarginChart } from "@/components/charts/margin-chart"
 import { LaborChart } from "@/components/charts/labor-chart"
+import { BillingChart } from "@/components/charts/billing-chart"
 import { cn } from "@/lib/utils"
 import { Shield, User } from "lucide-react"
 
@@ -117,6 +118,16 @@ export const ChatMessage = memo(function ChatMessage({
                 <LaborChart
                   data={output.sovLineBreakdown as unknown as Parameters<typeof LaborChart>[0]["data"]}
                   projectId={output.projectId as string}
+                />
+              </div>
+            )
+          }
+
+          if (tool.toolName === "billingAnalyzer" && output.projects) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <BillingChart
+                  projects={output.projects as unknown as Parameters<typeof BillingChart>[0]["projects"]}
                 />
               </div>
             )

@@ -10,7 +10,10 @@ import { Shield, Activity } from "lucide-react"
 const transport = new DefaultChatTransport({ api: "/api/chat" })
 
 export default function Home() {
-  const { messages, sendMessage, status } = useChat({ transport })
+  const { messages, sendMessage, status } = useChat({
+    id: "margin-guard",
+    transport,
+  })
   const scrollRef = useRef<HTMLDivElement>(null)
   const isLoading = status === "streaming" || status === "submitted"
   const hasMessages = messages.length > 0
@@ -70,19 +73,39 @@ export default function Home() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl px-4 lg:px-6">
           {!hasMessages && (
-            <div className="flex flex-col items-center justify-center py-20 gap-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+            <div className="flex flex-col items-center justify-center py-16 gap-8">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
                 <Shield className="h-8 w-8 text-primary" />
               </div>
-              <div className="text-center">
-                <h2 className="text-lg font-semibold text-foreground">
+              <div className="text-center max-w-lg">
+                <h2 className="text-xl font-semibold text-foreground text-balance">
                   Margin Guard
                 </h2>
-                <p className="mt-1 text-sm text-muted-foreground max-w-md leading-relaxed">
-                  Your AI financial analyst for HVAC portfolio
-                  intelligence. I autonomously scan projects, investigate
-                  margin erosion, and recommend recovery actions.
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed text-pretty">
+                  Your AI-powered margin protection agent. I autonomously
+                  scan your $101M HVAC portfolio, investigate root causes
+                  of margin erosion, and deliver prioritized recovery actions.
                 </p>
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-xl">
+                {[
+                  { label: "Projects", value: "5 Active" },
+                  { label: "Portfolio", value: "$101M" },
+                  { label: "Records", value: "18K+" },
+                  { label: "Tools", value: "10 Agents" },
+                ].map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="rounded-lg border border-border bg-card/50 px-3 py-2 text-center"
+                  >
+                    <div className="text-xs text-muted-foreground">
+                      {stat.label}
+                    </div>
+                    <div className="text-sm font-semibold text-foreground">
+                      {stat.value}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
