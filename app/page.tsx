@@ -10,10 +10,12 @@ import { Shield, Activity } from "lucide-react"
 const transport = new DefaultChatTransport({ api: "/api/chat" })
 
 export default function Home() {
+  console.log("[v0] Home component rendering")
   const { messages, sendMessage, status } = useChat({
     id: "margin-guard",
     transport,
   })
+  console.log("[v0] useChat status:", status, "messages:", messages.length)
   const scrollRef = useRef<HTMLDivElement>(null)
   const isLoading = status === "streaming" || status === "submitted"
   const hasMessages = messages.length > 0
@@ -120,11 +122,11 @@ export default function Home() {
             (() => {
               const lastMsg = messages[messages.length - 1]
               const parts = lastMsg.parts ?? []
-              const hasContent = parts.some(
-                (p) =>
-                  (p.type === "text" &&
-                    (p as { text: string }).text.trim()) ||
-                  p.type.startsWith("tool-")
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const hasContent = (parts as any[]).some(
+                (p: any) =>
+                  (p.type === "text" && String(p.text || "").trim()) ||
+                  p.type === "tool-invocation"
               )
               return !hasContent
             })() && (

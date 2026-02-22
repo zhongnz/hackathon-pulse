@@ -30,25 +30,18 @@ export const ChatMessage = memo(function ChatMessage({
     output?: unknown
   }> = []
 
-  for (const part of message.parts ?? []) {
-    if (part.type === "text" && (part as { text: string }).text.trim()) {
-      textParts.push((part as { text: string }).text)
-    } else if (part.type.startsWith("tool-")) {
-      const toolPart = part as unknown as {
-        toolCallId: string
-        toolName: string
-        state: string
-        input: unknown
-        output?: unknown
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const part of message.parts as any[]) {
+    if (part.type === "text") {
+      if (part.text && String(part.text).trim()) {
+        textParts.push(String(part.text))
       }
+    } else if (part.type === "tool-invocation") {
       toolParts.push({
-        toolName: toolPart.toolName,
-        state: toolPart.state,
-        input: (toolPart.input ?? {}) as Record<string, unknown>,
-        output:
-          toolPart.state === "output-available"
-            ? toolPart.output
-            : undefined,
+        toolName: String(part.toolName ?? "unknown"),
+        state: String(part.state ?? ""),
+        input: (part.input ?? {}) as Record<string, unknown>,
+        output: part.state === "output-available" ? part.output : undefined,
       })
     }
   }

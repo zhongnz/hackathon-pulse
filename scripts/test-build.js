@@ -1,10 +1,18 @@
 import { execSync } from "child_process";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const projectRoot = resolve(__dirname, "..");
+
+console.log("Project root:", projectRoot);
 
 try {
-  const output = execSync("cd /vercel/share/v0-project && npx next build 2>&1", {
+  const output = execSync("npx next build 2>&1", {
     encoding: "utf-8",
-    timeout: 120000,
+    timeout: 180000,
     maxBuffer: 1024 * 1024 * 10,
+    cwd: projectRoot,
   });
   console.log("BUILD OUTPUT:");
   console.log(output);
