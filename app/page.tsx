@@ -66,6 +66,12 @@ export default function Home() {
               ~$101M Portfolio
             </span>
           </div>
+          <div className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1">
+            <div className="h-2 w-2 rounded-full bg-emerald-500" />
+            <span className="text-[10px] font-medium text-muted-foreground">
+              Powered by Granola
+            </span>
+          </div>
         </div>
       </header>
 
@@ -73,7 +79,7 @@ export default function Home() {
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto max-w-3xl px-4 lg:px-6">
           {!hasMessages && (
-            <div className="flex flex-col items-center justify-center py-16 gap-8">
+            <div className="flex flex-col items-center justify-center py-12 gap-6">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/20">
                 <Shield className="h-8 w-8 text-primary" />
               </div>
@@ -82,23 +88,50 @@ export default function Home() {
                   Margin Guard
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed text-pretty">
-                  Your AI-powered margin protection agent. I autonomously
-                  scan your $101M HVAC portfolio, investigate root causes
-                  of margin erosion, and deliver prioritized recovery actions.
+                  Your autonomous AI agent for margin protection. I scan your $101M HVAC
+                  portfolio, chain multi-step investigations to uncover root causes, and
+                  deliver dollar-denominated recovery actions.
+                </p>
+                <p className="mt-1.5 text-xs text-muted-foreground/70">
+                  Reasoning framework powered by Granola | Built with Vercel AI SDK
                 </p>
               </div>
+
+              {/* Capability pills */}
+              <div className="flex flex-wrap justify-center gap-2 max-w-lg">
+                {[
+                  "Portfolio Scanning",
+                  "Labor Analysis",
+                  "Change Order Tracking",
+                  "Billing Lag Detection",
+                  "Field Note Risk Signals",
+                  "SOV Drilldown",
+                  "Margin Forecasting",
+                  "Cross-Project Patterns",
+                  "Proactive Alerts",
+                  "Email Reports",
+                ].map((cap) => (
+                  <span
+                    key={cap}
+                    className="rounded-full border border-border bg-card/50 px-2.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                  >
+                    {cap}
+                  </span>
+                ))}
+              </div>
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full max-w-xl">
                 {[
-                  { label: "Projects", value: "5 Active" },
-                  { label: "Portfolio", value: "$101M" },
-                  { label: "Records", value: "18K+" },
-                  { label: "Tools", value: "10 Agents" },
+                  { label: "Active Projects", value: "5" },
+                  { label: "Portfolio Value", value: "$101M" },
+                  { label: "Data Records", value: "18K+" },
+                  { label: "Agent Tools", value: "12" },
                 ].map((stat) => (
                   <div
                     key={stat.label}
                     className="rounded-lg border border-border bg-card/50 px-3 py-2 text-center"
                   >
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
                       {stat.label}
                     </div>
                     <div className="text-sm font-semibold text-foreground">

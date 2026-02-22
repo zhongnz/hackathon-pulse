@@ -15,7 +15,7 @@ export async function POST(req: Request) {
       messages: converted,
       tools: agentTools,
       toolChoice: "auto",
-      stopWhen: stepCountIs(15),
+      stopWhen: stepCountIs(20),
       maxOutputTokens: 16000,
     })
 

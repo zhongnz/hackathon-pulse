@@ -13,9 +13,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Margin Guard - HVAC Portfolio Intelligence",
+  title: "Margin Guard - AI Margin Protection Agent",
   description:
-    "AI-powered margin protection agent for commercial HVAC contractors. Autonomous portfolio scanning, root cause analysis, and actionable recovery recommendations.",
+    "Autonomous AI agent that protects profit margins across a $101M HVAC construction portfolio. Powered by Granola reasoning framework and Vercel AI SDK. Scans 18K+ records, chains multi-step investigations, and delivers dollar-denominated recovery actions.",
 }
 
 export const viewport: Viewport = {

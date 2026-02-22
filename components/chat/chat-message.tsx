@@ -8,6 +8,8 @@ import { PortfolioCards } from "@/components/charts/portfolio-cards"
 import { MarginChart } from "@/components/charts/margin-chart"
 import { LaborChart } from "@/components/charts/labor-chart"
 import { BillingChart } from "@/components/charts/billing-chart"
+import { ForecastChart } from "@/components/charts/forecast-chart"
+import { PatternsChart } from "@/components/charts/patterns-chart"
 import { cn } from "@/lib/utils"
 import { Shield, User, ArrowRight, AlertTriangle, AlertCircle, Info } from "lucide-react"
 
@@ -171,6 +173,32 @@ export const ChatMessage = memo(function ChatMessage({
               <div key={`chart-${i}`} className="w-full">
                 <BillingChart
                   projects={output.projects as unknown as Parameters<typeof BillingChart>[0]["projects"]}
+                />
+              </div>
+            )
+          }
+
+          // Cross-project patterns
+          if (tool.toolName === "crossProjectPatterns" && output.patterns) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <PatternsChart
+                  patterns={output.patterns as Parameters<typeof PatternsChart>[0]["patterns"]}
+                  focusArea={output.focusArea as string}
+                />
+              </div>
+            )
+          }
+
+          // Margin forecast chart
+          if (tool.toolName === "marginForecast" && output.scenarios) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <ForecastChart
+                  projectName={output.projectName as string}
+                  currentState={output.currentState as Parameters<typeof ForecastChart>[0]["currentState"]}
+                  scenarios={output.scenarios as Parameters<typeof ForecastChart>[0]["scenarios"]}
+                  recoveryPotential={output.recoveryPotential as Parameters<typeof ForecastChart>[0]["recoveryPotential"]}
                 />
               </div>
             )
