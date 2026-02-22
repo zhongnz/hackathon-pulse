@@ -132,9 +132,9 @@ export function ToolActivity({
   }
   const Icon = meta.icon
   const isRunning =
-    state === "input-available" || state === "input-streaming"
-  const isDone = state === "output-available"
-  const isError = state === "output-error"
+    state === "input-available" || state === "input-streaming" || state === "call" || state === "partial-call"
+  const isDone = state === "output-available" || state === "result"
+  const isError = state === "output-error" || state === "error"
 
   // Build a human-readable summary of what was analyzed
   const inputSummary = Object.entries(input || {})
