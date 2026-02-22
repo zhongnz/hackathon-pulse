@@ -78,8 +78,8 @@ export interface RFIRow {
   date_required: string
   date_responded: string
   response_summary: string
-  cost_impact: string
-  schedule_impact: string
+  cost_impact: string | boolean
+  schedule_impact: string | boolean
 }
 
 export interface FieldNoteRow {

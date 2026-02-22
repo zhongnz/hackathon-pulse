@@ -34,7 +34,9 @@ export const portfolioScanner = tool({
     const portfolio = getPortfolioSummary()
 
     const projects = projectId
-      ? [summaries.get(projectId)].filter(Boolean)
+      ? [summaries.get(projectId)].filter(
+          (p): p is NonNullable<typeof p> => p != null
+        )
       : Array.from(summaries.values())
 
     return {
@@ -56,21 +58,21 @@ export const portfolioScanner = tool({
             greenProjects: portfolio.greenProjects,
           },
       projects: projects.map((p) => ({
-        projectId: p!.projectId,
-        projectName: p!.projectName,
-        contractValue: p!.contractValue,
-        adjustedContractValue: p!.adjustedContractValue,
-        bidMargin: (p!.bidMargin * 100).toFixed(1) + "%",
-        realizedMargin: (p!.realizedMargin * 100).toFixed(1) + "%",
-        marginErosion: (p!.marginErosion * 100).toFixed(1) + " pts",
-        totalActualCost: p!.totalActualCost,
-        approvedCOs: p!.approvedCOValue,
-        pendingCOs: p!.pendingCOValue,
-        percentComplete: (p!.percentComplete * 100).toFixed(1) + "%",
-        amountBilled: p!.amountBilled,
-        billingLag: p!.billingLag,
-        riskRating: p!.riskRating,
-        overtimePercent: (p!.overtimePercent * 100).toFixed(1) + "%",
+        projectId: p.projectId,
+        projectName: p.projectName,
+        contractValue: p.contractValue,
+        adjustedContractValue: p.adjustedContractValue,
+        bidMargin: (p.bidMargin * 100).toFixed(1) + "%",
+        realizedMargin: (p.realizedMargin * 100).toFixed(1) + "%",
+        marginErosion: (p.marginErosion * 100).toFixed(1) + " pts",
+        totalActualCost: p.totalActualCost,
+        approvedCOs: p.approvedCOValue,
+        pendingCOs: p.pendingCOValue,
+        percentComplete: (p.percentComplete * 100).toFixed(1) + "%",
+        amountBilled: p.amountBilled,
+        billingLag: p.billingLag,
+        riskRating: p.riskRating,
+        overtimePercent: (p.overtimePercent * 100).toFixed(1) + "%",
       })),
     }
   },
@@ -302,32 +304,34 @@ export const billingAnalyzer = tool({
     const summaries = getProjectSummaries()
     const billingHistory = getBillingHistory()
     const projects = projectId
-      ? [summaries.get(projectId)].filter(Boolean)
+      ? [summaries.get(projectId)].filter(
+          (p): p is NonNullable<typeof p> => p != null
+        )
       : Array.from(summaries.values())
 
     const projectBillingDetails = projects.map((p) => {
       const bills = billingHistory
-        .filter((b) => b.project_id === p!.projectId)
+        .filter((b) => b.project_id === p.projectId)
         .sort((a, b) => a.application_number - b.application_number)
 
       return {
-        projectId: p!.projectId,
-        projectName: p!.projectName,
-        contractValue: p!.adjustedContractValue,
-        percentComplete: (p!.percentComplete * 100).toFixed(1) + "%",
+        projectId: p.projectId,
+        projectName: p.projectName,
+        contractValue: p.adjustedContractValue,
+        percentComplete: (p.percentComplete * 100).toFixed(1) + "%",
         earnedValue: Math.round(
-          p!.percentComplete * p!.adjustedContractValue
+          p.percentComplete * p.adjustedContractValue
         ),
-        amountBilled: p!.amountBilled,
-        billingLag: Math.round(p!.billingLag),
+        amountBilled: p.amountBilled,
+        billingLag: Math.round(p.billingLag),
         billingLagPercent:
-          p!.adjustedContractValue > 0
+          p.adjustedContractValue > 0
             ? (
-                (p!.billingLag / p!.adjustedContractValue) *
+                (p.billingLag / p.adjustedContractValue) *
                 100
               ).toFixed(1) + "%"
             : "0%",
-        retentionHeld: p!.retentionHeld,
+        retentionHeld: p.retentionHeld,
         billingTimeline: bills.map((b) => ({
           period: b.period_end,
           periodBilled: b.period_total,
@@ -345,7 +349,7 @@ export const billingAnalyzer = tool({
     return {
       portfolioBillingLag: totalBillingLag,
       totalRetention: projects.reduce(
-        (sum, p) => sum + p!.retentionHeld,
+        (sum, p) => sum + p.retentionHeld,
         0
       ),
       projects: projectBillingDetails.sort(
