@@ -67,7 +67,7 @@ export function MarginChart({ projects }: MarginChartProps) {
                 fontSize: "12px",
                 color: "hsl(210, 20%, 93%)",
               }}
-              formatter={(value: number) => [`${value.toFixed(1)}%`]}
+              formatter={(value: string | number | (string | number)[]) => [`${Number(value).toFixed(1)}%`]}
             />
             <Legend
               wrapperStyle={{ fontSize: "11px", color: "hsl(215, 15%, 55%)" }}

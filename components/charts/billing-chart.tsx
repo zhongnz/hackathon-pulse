@@ -61,8 +61,8 @@ export function BillingChart({ projects }: BillingChartProps) {
                 fontSize: "12px",
                 color: "hsl(210, 20%, 93%)",
               }}
-              formatter={(value: number, name: string) => [
-                `$${value.toLocaleString()}K`,
+              formatter={(value: string | number | (string | number)[], name: string) => [
+                `$${Number(value).toLocaleString()}K`,
                 name,
               ]}
             />

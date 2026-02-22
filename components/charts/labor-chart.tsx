@@ -60,7 +60,7 @@ export function LaborChart({ data, projectId }: LaborChartProps) {
                 fontSize: "12px",
                 color: "hsl(210, 20%, 93%)",
               }}
-              formatter={(value: number) => [`$${value}K`]}
+              formatter={(value: string | number | (string | number)[]) => [`$${value}K`]}
             />
             <Legend
               wrapperStyle={{ fontSize: "11px", color: "hsl(215, 15%, 55%)" }}

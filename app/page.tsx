@@ -10,12 +10,10 @@ import { Shield, Activity } from "lucide-react"
 const transport = new DefaultChatTransport({ api: "/api/chat" })
 
 export default function Home() {
-  console.log("[v0] Home component rendering")
   const { messages, sendMessage, status } = useChat({
     id: "margin-guard",
     transport,
   })
-  console.log("[v0] useChat status:", status, "messages:", messages.length)
   const scrollRef = useRef<HTMLDivElement>(null)
   const isLoading = status === "streaming" || status === "submitted"
   const hasMessages = messages.length > 0
