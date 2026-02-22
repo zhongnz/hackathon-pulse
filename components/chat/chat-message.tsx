@@ -94,16 +94,17 @@ export const ChatMessage = memo(function ChatMessage({
           const output = tool.output as Record<string, unknown>
 
           if (tool.toolName === "portfolioScanner" && output.projects) {
-            const projects = output.projects as Array<Record<string, unknown>>
+            const projects = output.projects as unknown as Parameters<typeof PortfolioCards>[0]["projects"]
+            const portfolio = output.portfolio as unknown as Parameters<typeof PortfolioCards>[0]["portfolio"]
             return (
               <div key={`chart-${i}`} className="w-full">
                 <PortfolioCards
-                  portfolio={output.portfolio as Parameters<typeof PortfolioCards>[0]["portfolio"]}
-                  projects={projects as Parameters<typeof PortfolioCards>[0]["projects"]}
+                  portfolio={portfolio}
+                  projects={projects}
                 />
                 {projects.length > 1 && (
                   <MarginChart
-                    projects={projects as Parameters<typeof MarginChart>[0]["projects"]}
+                    projects={projects as unknown as Parameters<typeof MarginChart>[0]["projects"]}
                   />
                 )}
               </div>
@@ -114,7 +115,7 @@ export const ChatMessage = memo(function ChatMessage({
             return (
               <div key={`chart-${i}`} className="w-full">
                 <LaborChart
-                  data={output.sovLineBreakdown as Parameters<typeof LaborChart>[0]["data"]}
+                  data={output.sovLineBreakdown as unknown as Parameters<typeof LaborChart>[0]["data"]}
                   projectId={output.projectId as string}
                 />
               </div>
