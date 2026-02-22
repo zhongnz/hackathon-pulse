@@ -91,16 +91,25 @@ export const ChatMessage = memo(function ChatMessage({
       if (part.text && String(part.text).trim()) {
         textParts.push(String(part.text))
       }
-    } else if (part.type === "tool-invocation") {
-      const inv = part.toolInvocation ?? part
-      console.log("[v0] Tool part:", inv.toolName, "state:", inv.state, "has output:", !!inv.output, "has result:", !!inv.result, "keys:", Object.keys(inv))
+    } else if (
+      part.type === "tool-invocation" ||
+      part.type === "dynamic-tool" ||
+      (typeof part.type === "string" && part.type.startsWith("tool-"))
+    ) {
+      // AI SDK 6: typed tool parts have type "tool-<toolName>" (e.g. "tool-portfolioScanner")
+      // Dynamic tools have type "dynamic-tool" with a toolName property
+      // Legacy: "tool-invocation" with toolInvocation property
+      const toolName =
+        part.toolName ??
+        (typeof part.type === "string" && part.type.startsWith("tool-")
+          ? part.type.slice(5) // strip "tool-" prefix
+          : "unknown")
+
       toolParts.push({
-        toolName: String(inv.toolName ?? part.toolName ?? "unknown"),
-        state: String(inv.state ?? part.state ?? ""),
-        input: (inv.args ?? inv.input ?? part.input ?? {}) as Record<string, unknown>,
-        output: (inv.state === "result" || inv.state === "output-available")
-          ? (inv.result ?? inv.output ?? part.output)
-          : undefined,
+        toolName: String(toolName),
+        state: String(part.state ?? ""),
+        input: (part.input ?? part.args ?? {}) as Record<string, unknown>,
+        output: part.state === "output-available" ? part.output : undefined,
       })
     }
   }
@@ -152,7 +161,6 @@ export const ChatMessage = memo(function ChatMessage({
         {toolParts.map((tool, i) => {
           if (!tool.output) return null
           const output = tool.output as Record<string, unknown>
-          console.log("[v0] Chart render check:", tool.toolName, "keys:", Object.keys(output))
 
           if (tool.toolName === "portfolioScanner" && output.projects) {
             const projects = output.projects as unknown as Parameters<typeof PortfolioCards>[0]["projects"]
