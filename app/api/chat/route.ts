@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const { messages } = await req.json()
 
   const result = streamText({
-    model: "openai/gpt-4o",
+    model: "openai/gpt-5.3",
     system: SYSTEM_PROMPT,
     messages: await convertToModelMessages(messages),
     tools: agentTools,
