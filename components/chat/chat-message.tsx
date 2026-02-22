@@ -10,6 +10,11 @@ import { LaborChart } from "@/components/charts/labor-chart"
 import { BillingChart } from "@/components/charts/billing-chart"
 import { ForecastChart } from "@/components/charts/forecast-chart"
 import { PatternsChart } from "@/components/charts/patterns-chart"
+import { ChangeOrderChart } from "@/components/charts/change-order-chart"
+import { SOVChart } from "@/components/charts/sov-chart"
+import { FieldNotesChart } from "@/components/charts/field-notes-chart"
+import { RFIChart } from "@/components/charts/rfi-chart"
+import { MaterialChart } from "@/components/charts/material-chart"
 import { cn } from "@/lib/utils"
 import { Shield, User, ArrowRight, AlertTriangle, AlertCircle, Info } from "lucide-react"
 
@@ -199,6 +204,90 @@ export const ChatMessage = memo(function ChatMessage({
                   currentState={output.currentState as Parameters<typeof ForecastChart>[0]["currentState"]}
                   scenarios={output.scenarios as Parameters<typeof ForecastChart>[0]["scenarios"]}
                   recoveryPotential={output.recoveryPotential as Parameters<typeof ForecastChart>[0]["recoveryPotential"]}
+                />
+              </div>
+            )
+          }
+
+          // Change order tracker
+          if (tool.toolName === "changeOrderTracker" && output.approved) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <ChangeOrderChart
+                  approved={output.approved as { count: number; totalValue: number }}
+                  pending={output.pending as { count: number; totalValue: number }}
+                  denied={output.denied as { count: number; totalValue: number }}
+                  byReasonCategory={output.byReasonCategory as Parameters<typeof ChangeOrderChart>[0]["byReasonCategory"]}
+                  approvalRate={output.approvalRate as string}
+                  projectId={output.projectId as string}
+                />
+              </div>
+            )
+          }
+
+          // SOV drilldown
+          if (tool.toolName === "sovDrilldown" && output.lines) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <SOVChart
+                  lines={output.lines as Parameters<typeof SOVChart>[0]["lines"]}
+                  projectId={output.projectId as string}
+                />
+              </div>
+            )
+          }
+
+          // Field notes scanner
+          if (tool.toolName === "fieldNotesScanner" && output.totalMatches !== undefined) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <FieldNotesChart
+                  totalMatches={output.totalMatches as number}
+                  totalNotes={output.totalNotesScanned as number}
+                  matchRate={output.matchRate as string}
+                  matches={(output.topMatches as Parameters<typeof FieldNotesChart>[0]["matches"]) ?? []}
+                  keywords={(output.signalFrequency as Array<{ signal: string }>)?.map(s => s.signal) ?? []}
+                />
+              </div>
+            )
+          }
+
+          // RFI tracker
+          if (tool.toolName === "rfiTracker" && output.totalRFIs !== undefined) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <RFIChart
+                  totalRFIs={output.totalRFIs as number}
+                  open={output.open as number}
+                  closed={output.closed as number}
+                  avgResponseDays={`${output.averageResponseDays}d`}
+                  costImpacts={output.withCostImpact as number}
+                  scheduleImpacts={output.withScheduleImpact as number}
+                  topRFIs={(output.costImpactRFIs as Array<{
+                    rfiNumber: string; subject: string; status: string;
+                  }>)?.map(r => ({
+                    ...r,
+                    responseDays: 0,
+                    costImpact: 0,
+                    scheduleDays: 0,
+                  })) ?? []}
+                  projectId={output.projectId as string}
+                />
+              </div>
+            )
+          }
+
+          // Material analyzer
+          if (tool.toolName === "materialAnalyzer" && output.totalActualMaterial !== undefined) {
+            return (
+              <div key={`chart-${i}`} className="w-full">
+                <MaterialChart
+                  totalSpend={output.totalActualMaterial as number}
+                  deliveryCount={output.deliveryCount as number}
+                  issueCount={(output.conditionIssues as unknown[])?.length ?? 0}
+                  topVendors={(output.byVendor as Array<{ vendor: string; totalCost: number }>)?.slice(0, 6).map(v => ({ ...v, deliveries: 0 })) ?? []}
+                  topMaterials={(output.byCategory as Array<{ category: string; totalCost: number }>)?.map(c => ({ materialType: c.category, totalCost: c.totalCost, count: 0 })) ?? []}
+                  projectId={output.projectId as string}
                 />
               </div>
             )
