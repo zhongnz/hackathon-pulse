@@ -10,9 +10,12 @@ import { Shield, Activity } from "lucide-react"
 const transport = new DefaultChatTransport({ api: "/api/chat" })
 
 export default function Home() {
-  const { messages, sendMessage, status } = useChat({
+  const { messages, sendMessage, status, error } = useChat({
     id: "margin-guard",
     transport,
+    onError: (err) => {
+      console.error("[v0] useChat error:", err)
+    },
   })
   const scrollRef = useRef<HTMLDivElement>(null)
   const isLoading = status === "streaming" || status === "submitted"
@@ -107,6 +110,13 @@ export default function Home() {
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {error && (
+            <div className="my-4 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-800">
+              <p className="font-semibold">Error:</p>
+              <p>{error.message || String(error)}</p>
             </div>
           )}
 
