@@ -13,9 +13,6 @@ export default function Home() {
   const { messages, sendMessage, status, error } = useChat({
     id: "margin-guard",
     transport,
-    onError: (err) => {
-      console.error("[v0] useChat error:", err)
-    },
   })
   const scrollRef = useRef<HTMLDivElement>(null)
   const isLoading = status === "streaming" || status === "submitted"
