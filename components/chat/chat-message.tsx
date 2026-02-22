@@ -29,17 +29,24 @@ export const ChatMessage = memo(function ChatMessage({
     output?: unknown
   }> = []
 
-  for (const part of message.parts) {
-    if (part.type === "text" && part.text.trim()) {
-      textParts.push(part.text)
-    } else if (part.type === "tool-invocation") {
+  for (const part of message.parts ?? []) {
+    if (part.type === "text" && (part as { text: string }).text.trim()) {
+      textParts.push((part as { text: string }).text)
+    } else if (part.type.startsWith("tool-")) {
+      const toolPart = part as unknown as {
+        toolCallId: string
+        toolName: string
+        state: string
+        input: unknown
+        output?: unknown
+      }
       toolParts.push({
-        toolName: part.toolInvocation.toolName,
-        state: part.state,
-        input: part.toolInvocation.input as Record<string, unknown>,
+        toolName: toolPart.toolName,
+        state: toolPart.state,
+        input: (toolPart.input ?? {}) as Record<string, unknown>,
         output:
-          part.state === "output-available"
-            ? part.toolInvocation.output
+          toolPart.state === "output-available"
+            ? toolPart.output
             : undefined,
       })
     }
