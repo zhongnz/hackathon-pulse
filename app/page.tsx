@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 import { useChat } from "@ai-sdk/react";
+import { DefaultChatTransport } from "ai";
 
 export default function Home() {
-  const { messages, sendMessage, status, error } = useChat({ api: "/api/chat" });
+  const { messages, sendMessage, status, error } = useChat({
+    transport: new DefaultChatTransport({ api: "/api/chat" }),
+  });
   const [draft, setDraft] = useState("");
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
