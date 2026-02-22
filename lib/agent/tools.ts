@@ -682,9 +682,12 @@ export const rfiTracker = tool({
 // Tool 9: Send Email Alert
 export const sendEmailAlert = tool({
   description:
-    "Sends an email alert or report via Resend. Use this when the user asks to email findings, send alerts about critical margin issues, or distribute a portfolio summary. Compose a professional email with the analysis results.",
+    "Sends an email alert or report via Resend. Use this when the user asks to email findings, send alerts about critical margin issues, or distribute a portfolio summary. Compose a professional email with the analysis results. The default recipient is fz2411@nyu.edu — use that unless the user specifies a different address.",
   inputSchema: z.object({
-    to: z.string().describe("Recipient email address"),
+    to: z
+      .string()
+      .default("fz2411@nyu.edu")
+      .describe("Recipient email address. Defaults to fz2411@nyu.edu"),
     subject: z.string().describe("Email subject line"),
     body: z
       .string()
@@ -693,15 +696,15 @@ export const sendEmailAlert = tool({
       ),
   }),
   execute: async ({ to, subject, body }) => {
+    const recipient = to || "fz2411@nyu.edu"
     try {
       const apiKey = process.env.RESEND_API_KEY
-      console.log("[v0] sendEmailAlert called — to:", to, "subject:", subject, "apiKey present:", !!apiKey)
 
       if (!apiKey) {
         return {
           success: false,
           error: "RESEND_API_KEY is not configured. Add it in the Vars section of the sidebar.",
-          to,
+          to: recipient,
           subject,
         }
       }
@@ -726,18 +729,16 @@ export const sendEmailAlert = tool({
 
       const result = await resend.emails.send({
         from: "Margin Guard <onboarding@resend.dev>",
-        to: [to],
+        to: [recipient],
         subject,
         html: htmlContent,
       })
 
-      console.log("[v0] Resend response:", JSON.stringify(result))
-
       if (result.error) {
         return {
           success: false,
-          error: `Resend API error: ${result.error.message}. Note: With the free onboarding@resend.dev sender, you can only send to the email address associated with your Resend account.`,
-          to,
+          error: `Resend API error: ${result.error.message}`,
+          to: recipient,
           subject,
         }
       }
@@ -745,17 +746,16 @@ export const sendEmailAlert = tool({
       return {
         success: true,
         messageId: result.data?.id ?? "sent",
-        to,
+        to: recipient,
         subject,
       }
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Unknown error"
-      console.log("[v0] sendEmailAlert error:", message)
       return {
         success: false,
         error: `Failed to send email: ${message}`,
-        to,
+        to: recipient,
         subject,
       }
     }
