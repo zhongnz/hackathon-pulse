@@ -81,6 +81,18 @@ const TOOL_META: Record<
     icon: TrendingUp,
     color: "text-sky-400",
   },
+  crossProjectPatterns: {
+    active: "Detecting Cross-Project Patterns",
+    done: "Detected Cross-Project Patterns",
+    icon: Search,
+    color: "text-indigo-400",
+  },
+  proactiveRiskAlert: {
+    active: "Running Proactive Risk Scan",
+    done: "Completed Risk Scan",
+    icon: BarChart3,
+    color: "text-red-400",
+  },
 }
 
 interface ToolActivityProps {

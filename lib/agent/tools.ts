@@ -865,6 +865,227 @@ export const marginForecast = tool({
   },
 })
 
+// Tool 11: Cross-Project Pattern Detector
+export const crossProjectPatterns = tool({
+  description:
+    "Detects systemic patterns across all 5 projects — common causes of overruns, recurring change order reasons, shared labor inefficiencies, vendor concentration risks, and billing patterns. Use this when the user wants to understand portfolio-wide trends or systemic root causes.",
+  inputSchema: z.object({
+    focusArea: z
+      .enum(["labor", "changeOrders", "materials", "billing", "all"])
+      .describe("Which area to analyze for cross-project patterns"),
+  }),
+  execute: async ({ focusArea }) => {
+    const summaries = getProjectSummaries()
+    const patterns: Record<string, unknown> = {}
+
+    if (focusArea === "labor" || focusArea === "all") {
+      const laborLogs = getLaborLogs()
+      // Overtime patterns by project
+      const otByProject: Record<string, { total: number; ot: number }> = {}
+      for (const l of laborLogs) {
+        if (!otByProject[l.project_id]) otByProject[l.project_id] = { total: 0, ot: 0 }
+        otByProject[l.project_id].total += l.hours_st + l.hours_ot
+        otByProject[l.project_id].ot += l.hours_ot
+      }
+      // Most expensive roles across portfolio
+      const roleCosts: Record<string, { cost: number; hours: number; projects: Set<string> }> = {}
+      for (const l of laborLogs) {
+        if (!roleCosts[l.role]) roleCosts[l.role] = { cost: 0, hours: 0, projects: new Set() }
+        roleCosts[l.role].cost += (l.hours_st + l.hours_ot * 1.5) * l.hourly_rate * l.burden_multiplier
+        roleCosts[l.role].hours += l.hours_st + l.hours_ot
+        roleCosts[l.role].projects.add(l.project_id)
+      }
+      patterns.labor = {
+        overtimeByProject: Object.entries(otByProject).map(([pid, d]) => ({
+          projectId: pid,
+          projectName: summaries.get(pid)?.projectName ?? pid,
+          overtimePercent: d.total > 0 ? ((d.ot / d.total) * 100).toFixed(1) + "%" : "0%",
+          totalOTHours: Math.round(d.ot),
+        })).sort((a, b) => b.totalOTHours - a.totalOTHours),
+        topRolesPortfolioWide: Object.entries(roleCosts)
+          .map(([role, d]) => ({ role, totalCost: Math.round(d.cost), totalHours: Math.round(d.hours), projectCount: d.projects.size }))
+          .sort((a, b) => b.totalCost - a.totalCost)
+          .slice(0, 10),
+      }
+    }
+
+    if (focusArea === "changeOrders" || focusArea === "all") {
+      const cos = getChangeOrders()
+      // Recurring reasons across projects
+      const reasonsByProject: Record<string, Record<string, number>> = {}
+      const reasonTotals: Record<string, { count: number; totalAmount: number; projects: Set<string> }> = {}
+      for (const co of cos) {
+        if (!reasonsByProject[co.project_id]) reasonsByProject[co.project_id] = {}
+        reasonsByProject[co.project_id][co.reason_category] = (reasonsByProject[co.project_id][co.reason_category] || 0) + 1
+        if (!reasonTotals[co.reason_category]) reasonTotals[co.reason_category] = { count: 0, totalAmount: 0, projects: new Set() }
+        reasonTotals[co.reason_category].count++
+        reasonTotals[co.reason_category].totalAmount += co.amount
+        reasonTotals[co.reason_category].projects.add(co.project_id)
+      }
+      // Systemic = appears in 3+ projects
+      const systemicReasons = Object.entries(reasonTotals)
+        .filter(([, d]) => d.projects.size >= 3)
+        .map(([reason, d]) => ({ reason, count: d.count, totalAmount: Math.round(d.totalAmount), projectCount: d.projects.size }))
+        .sort((a, b) => b.totalAmount - a.totalAmount)
+
+      patterns.changeOrders = {
+        systemicReasons,
+        approvalRateByProject: Array.from(summaries.entries()).map(([pid, s]) => {
+          const pcos = cos.filter(c => c.project_id === pid)
+          const approved = pcos.filter(c => c.status === "Approved").length
+          return { projectId: pid, projectName: s.projectName, approvalRate: pcos.length > 0 ? ((approved / pcos.length) * 100).toFixed(1) + "%" : "N/A", total: pcos.length }
+        }),
+      }
+    }
+
+    if (focusArea === "materials" || focusArea === "all") {
+      const materials = getMaterialDeliveries()
+      // Vendor concentration
+      const vendorSpend: Record<string, { total: number; projects: Set<string> }> = {}
+      for (const m of materials) {
+        if (!vendorSpend[m.vendor]) vendorSpend[m.vendor] = { total: 0, projects: new Set() }
+        vendorSpend[m.vendor].total += m.total_cost
+        vendorSpend[m.vendor].projects.add(m.project_id)
+      }
+      patterns.materials = {
+        topVendors: Object.entries(vendorSpend)
+          .map(([vendor, d]) => ({ vendor, totalSpend: Math.round(d.total), projectCount: d.projects.size }))
+          .sort((a, b) => b.totalSpend - a.totalSpend)
+          .slice(0, 10),
+        conditionIssues: materials.filter(m => m.condition_notes && !m.condition_notes.toLowerCase().includes("good")).length,
+        totalDeliveries: materials.length,
+      }
+    }
+
+    if (focusArea === "billing" || focusArea === "all") {
+      patterns.billing = {
+        billingLagByProject: Array.from(summaries.values())
+          .map(s => ({
+            projectId: s.projectId,
+            projectName: s.projectName,
+            billingLag: Math.round(s.billingLag),
+            billingLagAsPercentOfContract: s.adjustedContractValue > 0 ? ((s.billingLag / s.adjustedContractValue) * 100).toFixed(1) + "%" : "0%",
+            retentionHeld: s.retentionHeld,
+          }))
+          .sort((a, b) => b.billingLag - a.billingLag),
+        totalPortfolioBillingLag: Math.round(Array.from(summaries.values()).reduce((s, p) => s + p.billingLag, 0)),
+        totalRetention: Math.round(Array.from(summaries.values()).reduce((s, p) => s + p.retentionHeld, 0)),
+      }
+    }
+
+    return {
+      focusArea,
+      patterns,
+      insight: "Look for patterns that appear in 3+ projects — these indicate systemic process issues rather than project-specific problems.",
+    }
+  },
+})
+
+// Tool 12: Proactive Risk Alert
+export const proactiveRiskAlert = tool({
+  description:
+    "Runs a comprehensive proactive risk scan across the entire portfolio without being asked. Identifies the TOP 5 most urgent action items ranked by financial impact. Use this when the user first asks how the portfolio is doing, AFTER portfolioScanner, to surface critical alerts.",
+  inputSchema: z.object({}),
+  execute: async () => {
+    const summaries = getProjectSummaries()
+    const cos = getChangeOrders()
+    const fieldNotes = getFieldNotes()
+
+    const alerts: Array<{
+      severity: "critical" | "warning" | "info"
+      category: string
+      projectId: string
+      projectName: string
+      finding: string
+      financialImpact: number
+      recommendedAction: string
+    }> = []
+
+    for (const [pid, s] of summaries) {
+      // Critical margin erosion
+      if (s.marginErosion > 0.1) {
+        alerts.push({
+          severity: "critical",
+          category: "Margin Erosion",
+          projectId: pid,
+          projectName: s.projectName,
+          finding: `Margin eroded by ${(s.marginErosion * 100).toFixed(1)} pts (${(s.bidMargin * 100).toFixed(1)}% bid -> ${(s.realizedMargin * 100).toFixed(1)}% realized)`,
+          financialImpact: Math.round(s.marginErosion * s.adjustedContractValue),
+          recommendedAction: "Immediate cost audit and SOV line review required",
+        })
+      }
+
+      // Large pending CO exposure
+      if (s.pendingCOValue > 100_000) {
+        alerts.push({
+          severity: s.pendingCOValue > 500_000 ? "critical" : "warning",
+          category: "Unrecovered CO Costs",
+          projectId: pid,
+          projectName: s.projectName,
+          finding: `$${(s.pendingCOValue / 1000).toFixed(0)}K in pending change orders at risk`,
+          financialImpact: Math.round(s.pendingCOValue),
+          recommendedAction: "Expedite CO approvals; escalate items over 90 days old",
+        })
+      }
+
+      // Billing lag > 5% of contract
+      if (s.billingLag > s.adjustedContractValue * 0.05) {
+        alerts.push({
+          severity: "warning",
+          category: "Billing Lag",
+          projectId: pid,
+          projectName: s.projectName,
+          finding: `$${(s.billingLag / 1000).toFixed(0)}K earned but not billed (${((s.billingLag / s.adjustedContractValue) * 100).toFixed(1)}% of contract)`,
+          financialImpact: Math.round(s.billingLag),
+          recommendedAction: "Submit billing application immediately; review line item completion %",
+        })
+      }
+
+      // High overtime
+      if (s.overtimePercent > 0.15) {
+        const otCostPremium = s.totalOvertimeHours * 0.5 * (s.totalLaborCost / (s.totalLaborHours || 1))
+        alerts.push({
+          severity: "warning",
+          category: "Overtime Overrun",
+          projectId: pid,
+          projectName: s.projectName,
+          finding: `${(s.overtimePercent * 100).toFixed(1)}% overtime rate — premium costing ~$${(otCostPremium / 1000).toFixed(0)}K`,
+          financialImpact: Math.round(otCostPremium),
+          recommendedAction: "Review staffing levels; consider adding crew to reduce OT dependency",
+        })
+      }
+
+      // Scope creep signals
+      const notes = fieldNotes.filter(n => n.project_id === pid)
+      const scopeKeywords = ["extra work", "not in scope", "verbal approval", "owner requested", "additional"]
+      const scopeHits = notes.filter(n => scopeKeywords.some(kw => (n.content || "").toLowerCase().includes(kw)))
+      if (scopeHits.length > 10) {
+        const pendingCOs = cos.filter(c => c.project_id === pid && (c.status === "Pending" || c.status === "Under Review"))
+        alerts.push({
+          severity: "warning",
+          category: "Scope Creep Risk",
+          projectId: pid,
+          projectName: s.projectName,
+          finding: `${scopeHits.length} field notes with scope drift signals; only ${pendingCOs.length} pending COs submitted`,
+          financialImpact: Math.round(s.pendingCOValue * 0.5),
+          recommendedAction: "Cross-reference field notes with COs; submit COs for undocumented extra work",
+        })
+      }
+    }
+
+    // Sort by financial impact
+    alerts.sort((a, b) => b.financialImpact - a.financialImpact)
+
+    return {
+      totalAlerts: alerts.length,
+      criticalCount: alerts.filter(a => a.severity === "critical").length,
+      warningCount: alerts.filter(a => a.severity === "warning").length,
+      totalFinancialExposure: alerts.reduce((s, a) => s + a.financialImpact, 0),
+      topAlerts: alerts.slice(0, 8),
+    }
+  },
+})
+
 // Export all tools as a single object
 export const agentTools = {
   portfolioScanner,
@@ -877,4 +1098,6 @@ export const agentTools = {
   rfiTracker,
   sendEmailAlert,
   marginForecast,
+  crossProjectPatterns,
+  proactiveRiskAlert,
 }

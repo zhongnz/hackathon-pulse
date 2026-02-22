@@ -118,7 +118,7 @@ export default function Home() {
           )}
 
           {messages.map((message) => (
-            <ChatMessage key={message.id} message={message} />
+            <ChatMessage key={message.id} message={message} onFollowUp={handleSend} />
           ))}
 
           {/* Streaming indicator */}
