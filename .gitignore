@@ -29,3 +29,23 @@ pnpm-debug.log*
 
 # typescript
 *.tsbuildinfo
+# Environment variables
+.env
+
+# Virtual environment
+venv/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# macOS
+.DS_Store
+
+# VSCode
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/
