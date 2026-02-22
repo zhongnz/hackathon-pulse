@@ -682,12 +682,12 @@ export const rfiTracker = tool({
 // Tool 9: Send Email Alert
 export const sendEmailAlert = tool({
   description:
-    "Sends an email alert or report via Resend. Use this when the user asks to email findings, send alerts about critical margin issues, or distribute a portfolio summary. Compose a professional email with the analysis results. The default recipient is fz2411@nyu.edu — use that unless the user specifies a different address.",
+    "Sends an email alert or report via Resend. Use this when the user asks to email findings, send alerts about critical margin issues, or distribute a portfolio summary. Compose a professional email with the analysis results. The default recipient is peterzhongnz@gmail.com — use that unless the user specifies a different address.",
   inputSchema: z.object({
     to: z
       .string()
-      .default("fz2411@nyu.edu")
-      .describe("Recipient email address. Defaults to fz2411@nyu.edu"),
+      .default("peterzhongnz@gmail.com")
+      .describe("Recipient email address. Defaults to peterzhongnz@gmail.com"),
     subject: z.string().describe("Email subject line"),
     body: z
       .string()
@@ -696,7 +696,7 @@ export const sendEmailAlert = tool({
       ),
   }),
   execute: async ({ to, subject, body }) => {
-    const recipient = to || "fz2411@nyu.edu"
+    const recipient = to || "peterzhongnz@gmail.com"
     try {
       const apiKey = process.env.RESEND_API_KEY
 
