@@ -19,55 +19,65 @@ import { cn } from "@/lib/utils"
 
 const TOOL_META: Record<
   string,
-  { label: string; icon: React.ElementType; color: string }
+  { active: string; done: string; icon: React.ElementType; color: string }
 > = {
   portfolioScanner: {
-    label: "Scanning Portfolio",
+    active: "Scanning Portfolio",
+    done: "Scanned Portfolio",
     icon: Search,
     color: "text-sky-400",
   },
   laborAnalyzer: {
-    label: "Analyzing Labor Costs",
+    active: "Analyzing Labor Costs",
+    done: "Analyzed Labor Costs",
     icon: HardHat,
     color: "text-amber-400",
   },
   changeOrderTracker: {
-    label: "Tracking Change Orders",
+    active: "Tracking Change Orders",
+    done: "Tracked Change Orders",
     icon: DollarSign,
     color: "text-emerald-400",
   },
   billingAnalyzer: {
-    label: "Analyzing Billing",
+    active: "Analyzing Billing",
+    done: "Analyzed Billing",
     icon: BarChart3,
     color: "text-blue-400",
   },
   fieldNotesScanner: {
-    label: "Scanning Field Notes",
+    active: "Scanning Field Notes",
+    done: "Scanned Field Notes",
     icon: FileText,
     color: "text-orange-400",
   },
   materialAnalyzer: {
-    label: "Analyzing Materials",
+    active: "Analyzing Materials",
+    done: "Analyzed Materials",
     icon: Package,
     color: "text-violet-400",
   },
   sovDrilldown: {
-    label: "SOV Drilldown",
+    active: "Drilling into SOV",
+    done: "Completed SOV Drilldown",
     icon: ClipboardList,
     color: "text-cyan-400",
   },
   rfiTracker: {
-    label: "Tracking RFIs",
+    active: "Tracking RFIs",
+    done: "Tracked RFIs",
     icon: ClipboardList,
     color: "text-rose-400",
   },
   sendEmailAlert: {
-    label: "Sending Email",
+    active: "Sending Email",
+    done: "Sent Email",
     icon: Mail,
     color: "text-emerald-400",
   },
   marginForecast: {
-    label: "Forecasting Margin",
+    active: "Forecasting Margin",
+    done: "Forecasted Margin",
     icon: TrendingUp,
     color: "text-sky-400",
   },
@@ -88,7 +98,8 @@ export function ToolActivity({
 }: ToolActivityProps) {
   const [expanded, setExpanded] = useState(false)
   const meta = TOOL_META[toolName] ?? {
-    label: toolName,
+    active: toolName,
+    done: toolName,
     icon: Search,
     color: "text-muted-foreground",
   }
@@ -121,7 +132,7 @@ export function ToolActivity({
           <Icon className={cn("h-3.5 w-3.5", meta.color)} />
         )}
         <span className="text-muted-foreground">
-          {isRunning ? meta.label : isDone ? meta.label : "Error"}
+          {isRunning ? meta.active : isDone ? meta.done : "Error"}
         </span>
         {inputSummary && (
           <span className="truncate text-muted-foreground/60 max-w-[200px]">

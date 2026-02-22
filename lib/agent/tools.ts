@@ -24,9 +24,9 @@ export const portfolioScanner = tool({
   inputSchema: z.object({
     projectId: z
       .string()
-      .optional()
+      .nullable()
       .describe(
-        "Optional: filter to a specific project ID (e.g., PRJ-2024-001). If omitted, returns all projects."
+        "Filter to a specific project ID (e.g., PRJ-2024-001). Pass null to return all projects."
       ),
   }),
   execute: async ({ projectId }) => {
@@ -86,8 +86,8 @@ export const laborAnalyzer = tool({
       .describe("The project ID to analyze (e.g., PRJ-2024-001)"),
     sovLineId: z
       .string()
-      .optional()
-      .describe("Optional: drill down to a specific SOV line"),
+      .nullable()
+      .describe("Drill down to a specific SOV line. Pass null for all lines."),
   }),
   execute: async ({ projectId, sovLineId }) => {
     const laborLogs = getLaborLogs().filter(
@@ -206,9 +206,9 @@ export const changeOrderTracker = tool({
   inputSchema: z.object({
     projectId: z
       .string()
-      .optional()
+      .nullable()
       .describe(
-        "Optional project ID. If omitted, shows portfolio-wide CO analysis."
+        "Project ID to filter. Pass null for portfolio-wide CO analysis."
       ),
   }),
   execute: async ({ projectId }) => {
@@ -293,9 +293,9 @@ export const billingAnalyzer = tool({
   inputSchema: z.object({
     projectId: z
       .string()
-      .optional()
+      .nullable()
       .describe(
-        "Optional project ID. If omitted, shows portfolio-wide billing analysis."
+        "Project ID to filter. Pass null for portfolio-wide billing analysis."
       ),
   }),
   execute: async ({ projectId }) => {
@@ -362,13 +362,13 @@ export const fieldNotesScanner = tool({
   inputSchema: z.object({
     projectId: z
       .string()
-      .optional()
-      .describe("Optional project ID to filter notes"),
+      .nullable()
+      .describe("Project ID to filter notes. Pass null for all projects."),
     keywords: z
       .array(z.string())
-      .optional()
+      .nullable()
       .describe(
-        "Optional custom keywords to search for. If omitted, uses default risk signal keywords."
+        "Custom keywords to search for. Pass null to use default risk signal keywords."
       ),
   }),
   execute: async ({ projectId, keywords }) => {
@@ -473,8 +473,8 @@ export const materialAnalyzer = tool({
       .describe("The project ID to analyze"),
     sovLineId: z
       .string()
-      .optional()
-      .describe("Optional SOV line to drill into"),
+      .nullable()
+      .describe("SOV line to drill into. Pass null for all lines."),
   }),
   execute: async ({ projectId, sovLineId }) => {
     const deliveries = getMaterialDeliveries().filter(
@@ -604,8 +604,8 @@ export const rfiTracker = tool({
   inputSchema: z.object({
     projectId: z
       .string()
-      .optional()
-      .describe("Optional project ID filter"),
+      .nullable()
+      .describe("Project ID to filter. Pass null for all projects."),
   }),
   execute: async ({ projectId }) => {
     const allRFIs = getRFIs()

@@ -96,10 +96,12 @@ export default function Home() {
             messages.length > 0 &&
             (() => {
               const lastMsg = messages[messages.length - 1]
-              const hasContent = lastMsg.parts.some(
+              const parts = lastMsg.parts ?? []
+              const hasContent = parts.some(
                 (p) =>
-                  (p.type === "text" && p.text.trim()) ||
-                  p.type === "tool-invocation"
+                  (p.type === "text" &&
+                    (p as { text: string }).text.trim()) ||
+                  p.type.startsWith("tool-")
               )
               return !hasContent
             })() && (

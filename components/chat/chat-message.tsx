@@ -136,7 +136,7 @@ export const ChatMessage = memo(function ChatMessage({
             )}
           >
             {isAssistant ? (
-              <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h1]:font-semibold [&_h2]:text-sm [&_h2]:font-semibold [&_h3]:text-sm [&_h3]:font-medium [&_p]:text-sm [&_p]:leading-relaxed [&_li]:text-sm [&_strong]:text-foreground [&_ul]:my-1 [&_ol]:my-1 [&_code]:text-xs [&_code]:bg-secondary [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded">
+              <div className="prose prose-sm prose-invert max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_h1]:text-base [&_h1]:font-semibold [&_h1]:text-foreground [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:text-sm [&_h3]:font-medium [&_h3]:text-foreground [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-card-foreground [&_li]:text-sm [&_li]:text-card-foreground [&_strong]:text-foreground [&_ul]:my-1 [&_ol]:my-1 [&_code]:text-xs [&_code]:bg-secondary [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_a]:text-primary [&_a]:no-underline hover:[&_a]:underline [&_blockquote]:border-border [&_hr]:border-border">
                 <ReactMarkdown>{fullText}</ReactMarkdown>
               </div>
             ) : (

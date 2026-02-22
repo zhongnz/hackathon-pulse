@@ -107,12 +107,15 @@ export function getProjectSummaries(): Map<string, ProjectSummary> {
       (sum, li) => sum + li.scheduled_value,
       0
     )
-    const totalBilledLines = latestLineItems.reduce(
-      (sum, li) => sum + li.total_billed,
+    // Weighted average percent complete from billing line items
+    const weightedPctComplete = latestLineItems.reduce(
+      (sum, li) =>
+        sum +
+        (li.pct_complete / 100) * (totalScheduledValue > 0 ? li.scheduled_value / totalScheduledValue : 0),
       0
     )
     const percentComplete =
-      totalScheduledValue > 0 ? totalBilledLines / totalScheduledValue : 0
+      totalScheduledValue > 0 ? weightedPctComplete : 0
 
     // Bid margin from SOV budget
     const projectBudget = sovBudget.filter((b) => b.project_id === pid)
