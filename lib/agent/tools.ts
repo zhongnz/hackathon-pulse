@@ -424,7 +424,8 @@ export const fieldNotesScanner = tool({
     }> = []
 
     for (const note of projectNotes) {
-      const content = (note.content || "").toLowerCase()
+      const rawContent = note.content != null ? String(note.content) : ""
+      const content = rawContent.toLowerCase()
       const matched = searchTerms.filter((kw) =>
         content.includes(kw.toLowerCase())
       )
@@ -437,9 +438,9 @@ export const fieldNotesScanner = tool({
           noteType: note.note_type,
           matchedKeywords: matched,
           excerpt:
-            note.content.length > 300
-              ? note.content.slice(0, 300) + "..."
-              : note.content,
+            rawContent.length > 300
+              ? rawContent.slice(0, 300) + "..."
+              : rawContent,
         })
       }
     }
@@ -456,7 +457,9 @@ export const fieldNotesScanner = tool({
       totalNotesScanned: projectNotes.length,
       totalMatches: matches.length,
       matchRate:
-        ((matches.length / projectNotes.length) * 100).toFixed(1) + "%",
+        projectNotes.length > 0
+          ? ((matches.length / projectNotes.length) * 100).toFixed(1) + "%"
+          : "0.0%",
       signalFrequency: Object.entries(signalGroups)
         .map(([signal, count]) => ({ signal, count }))
         .sort((a, b) => b.count - a.count),
@@ -527,8 +530,9 @@ export const materialAnalyzer = tool({
     // Condition issues
     const issues = deliveries.filter(
       (d) =>
-        d.condition_notes &&
-        !d.condition_notes.toLowerCase().includes("good condition")
+        d.condition_notes != null &&
+        String(d.condition_notes).trim() !== "" &&
+        !String(d.condition_notes).toLowerCase().includes("good condition")
     )
 
     return {
@@ -952,7 +956,7 @@ export const crossProjectPatterns = tool({
           .map(([vendor, d]) => ({ vendor, totalSpend: Math.round(d.total), projectCount: d.projects.size }))
           .sort((a, b) => b.totalSpend - a.totalSpend)
           .slice(0, 10),
-        conditionIssues: materials.filter(m => m.condition_notes && !m.condition_notes.toLowerCase().includes("good")).length,
+        conditionIssues: materials.filter(m => m.condition_notes != null && String(m.condition_notes).trim() !== "" && !String(m.condition_notes).toLowerCase().includes("good")).length,
         totalDeliveries: materials.length,
       }
     }
@@ -1058,7 +1062,7 @@ export const proactiveRiskAlert = tool({
       // Scope creep signals
       const notes = fieldNotes.filter(n => n.project_id === pid)
       const scopeKeywords = ["extra work", "not in scope", "verbal approval", "owner requested", "additional"]
-      const scopeHits = notes.filter(n => scopeKeywords.some(kw => (n.content || "").toLowerCase().includes(kw)))
+      const scopeHits = notes.filter(n => scopeKeywords.some(kw => String(n.content ?? "").toLowerCase().includes(kw)))
       if (scopeHits.length > 10) {
         const pendingCOs = cos.filter(c => c.project_id === pid && (c.status === "Pending" || c.status === "Under Review"))
         alerts.push({

@@ -17,14 +17,19 @@ import type {
 const DATA_DIR = path.join(process.cwd(), "hvac_construction_dataset")
 
 function parseCSV<T>(filename: string): T[] {
-  const filePath = path.join(DATA_DIR, filename)
-  const raw = fs.readFileSync(filePath, "utf-8")
-  const result = Papa.parse<T>(raw, {
-    header: true,
-    skipEmptyLines: true,
-    dynamicTyping: true,
-  })
-  return result.data
+  try {
+    const filePath = path.join(DATA_DIR, filename)
+    const raw = fs.readFileSync(filePath, "utf-8")
+    const result = Papa.parse<T>(raw, {
+      header: true,
+      skipEmptyLines: true,
+      dynamicTyping: true,
+    })
+    return result.data
+  } catch (err) {
+    console.error(`[MarginGuard] Failed to parse ${filename}:`, err)
+    return []
+  }
 }
 
 // Module-level singletons - parsed once, reused across all requests
